@@ -7,7 +7,10 @@ C = 20
 class Agent:
     def __init__(self, m):
         self.m = m
-        self.preferences = random.sample(range(C + 1), m)
+        pref = random.sample(range(C + 1), m)
+        total = sum(pref)
+        normalized_pref = [x / total for x in pref]
+        self.preferences = normalized_pref
         self.bundle = []
         self.welfare = 0
 
@@ -136,7 +139,7 @@ def main():
         r_2 = SW_analysis(agents, 'QRRR', True)
         for agent in agents:
             agent.reset()
-        print(r_1 > r_2)
+        print(r_1 >= r_2)
 
 
 if __name__ == "__main__":
