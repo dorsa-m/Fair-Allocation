@@ -88,7 +88,9 @@ def NSW_max_driver(values1, values2):
     print("Bundle 2:", allocation[1])
 
 
-lst = check_feasibility([0.1,0.2,0.3,0.4], [1,3])
-# check_feasibility([0.25 * element for element in [1,1,1,1]], [1,3,2])
-NSW_max_driver([0.1,0.2,0.3,0.4],lst)
+lst = check_feasibility([0.1,0.2,0.31,0.39], [0,1,3])
+# lst = check_feasibility([0.25 * element for element in [1,1,1,1]], [1,3,2])
+# NSW_max_driver([0.1,0.2,0.3,0.4],lst)
 
+# lst = check_feasibility([0.2, 0, 0, 0.8], [0,1,2])
+# NSW_max_driver([0,0.335,0,0.665],[0.05, 0.99, 0.05, 0])
