@@ -1,4 +1,7 @@
 import random
+import matplotlib.pyplot as plt
+from collections import Counter
+from itertools import permutations, product
 
 
 class Agent:
@@ -116,31 +119,92 @@ def update_injustice_matrix(winner, tie_group, injustice_scores):
         if other_agent != winner:
             injustice_scores[other_agent][winner] -= 1
 
+
 def play_round(agents, available_items, permutation):
     end_flag = False
     for agent_index in permutation:
         if not available_items:
             end_flag = True
             return end_flag
-        agent = agents[agent_index-1]
+        agent = agents[agent_index - 1]
         chosen_item = agent.make_choice(available_items)
         agent.bundle.append(chosen_item)
         available_items.remove(chosen_item)
     return end_flag
-def picking_sequences(n, m, perm):
+
+
+def calculate_permutation_lists(m, n):
+    # Generate all permutations of 1 to n
+    all_permutations = list(map(list, permutations(range(1, m + 1))))
+    # Generate all possible pairs of permutations using Cartesian product
+    product_permutations = product(all_permutations, repeat=n)
+    res = list(map(list, product_permutations))
+    return res
+
+
+def picking_sequences(values, n, m, perm, same_seq=True):
     # values = generate_values(n, m)
-    values = [[8, 2, 7, 1, 6, 5, 4, 3], [8, 2, 7, 1, 6, 5, 4, 3], [2, 8, 7, 1, 6, 5, 4, 3], [2, 8, 7, 6, 5, 1, 4, 3]]
+    # values = [[8, 2, 7, 1, 6, 5, 4, 3], [8, 2, 7, 1, 6, 5, 4, 3], [2, 8, 7, 1, 6, 5, 4, 3], [2, 8, 7, 6, 5, 1, 4, 3]]
     agents = initialize_agents(values, m, n)
     available_items = list(range(m))
     end_flag = False
     while not end_flag:
-        end_flag = play_round(agents, available_items, perm)
+        if same_seq:
+            end_flag = play_round(agents, available_items, perm)
+        else:
+            if not perm:
+                return agents
+            end_flag = play_round(agents, available_items, perm[0])
+            perm.pop(0)
     return agents
 
-# random.seed(6)
-# res = MRR(4, 8)
-res = picking_sequences(4,8,[1,2,3,4])
-show_agents(res)
-print('***********************************')
-print('Egalitarian SW:')
-print(egal_sw(res))
+
+def draw_frequency(data, i):
+    # Use Counter to count the frequency of each sublist
+    list_counter = Counter(map(tuple, data))
+
+    # Separate keys and values
+    lists = [tuple(key) for key in list_counter.keys()]
+    frequencies = list(list_counter.values())
+    # print(len(frequencies))
+    # if min(frequencies) == max(frequencies):
+    #     print("All the same!")
+    #     return
+    plt.bar(list(range(len(lists))), [f/sum(frequencies) for f in frequencies])
+    plt.xticks(range(len(lists)), lists, rotation='vertical')
+    plt.xlabel('Lists')
+    plt.ylabel('Frequency')
+    plt.title(f'Frequency of Each Bundle for agent {i+1}')
+    plt.show()
+
+n = 2
+m = 4
+
+all_borda_valuations = calculate_permutation_lists(m, n)
+all_bundles_agent_1 = []
+all_bundles_agent_2 = []
+for valuation in all_borda_valuations:
+    # res = picking_sequences(valuation,n,m,[[1,2],[1,2],[2,2]],False)
+    res = picking_sequences(valuation, n, m, [[1, 2], [2,1]], False)
+    # res = picking_sequences(valuation, n, m, [1, 2])
+    # show_agents(res)
+    agent = res[0]
+    bundle = [agent.preferences[i] for i in agent.bundle]
+    all_bundles_agent_1.append(bundle)
+    agent = res[1]
+    bundle = [agent.preferences[i] for i in agent.bundle]
+    all_bundles_agent_2.append(bundle)
+    # print(bundle)
+    # print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
+draw_frequency(all_bundles_agent_1, 0)
+draw_frequency(all_bundles_agent_2, 1)
+
+# # random.seed(6)
+# # res = MRR(4, 8)
+#
+# # res = picking_sequences(4,8,[1,2,3,4])
+# res = picking_sequences(2, 4, [[1, 2], [1, 2]])
+# show_agents(res)
+# print('***********************************')
+# print('Egalitarian SW:')
+# print(egal_sw(res))
